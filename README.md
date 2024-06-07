@@ -12,4 +12,5 @@ Current functionality:
 
 ### Loading the db
 You need to start the app at least once to create the DB. Then run below:
+
     python3 order_tracker/database/add_samples.py

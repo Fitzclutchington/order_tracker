@@ -1,0 +1,23 @@
+.status-sale {
+    background-color: lightyellow;
+}
+
+.status-payment {
+    background-color: lightyellow;
+}
+
+.status-production {
+    background-color: lightyellow;
+}
+
+.status-delivery {
+    background-color: lightyellow;
+}
+
+.status-complete {
+    background-color: lightgreen;
+}
+
+.status-blocked {
+    background-color: lightcoral;
+}
