@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='order_tracker/css/base.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='order_tracker/css/bootstrap.css')}}">
+    <meta charset="" UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Order Tracker</title>
+</head>
+
+<body>
+
+{% include "navbar.html" %}
+
+
+{% block content %}
+{% endblock %}
+
+
+    <script src="{{ url_for('static', path='order_tracker/javascript/jquery-slim.js')}}"></script>
+    <script src="{{ url_for('static', path='order_tracker/javascript/popper.js')}}"></script>
+    <script src="{{ url_for('static', path='order_tracker/javascript/bootstrap.js')}}"></script>
+</body>
+
+</html>
