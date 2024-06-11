@@ -11,6 +11,7 @@ def add_samples(samples: pd.DataFrame) -> None:
     with SessionLocal() as db:
         for _, row in samples.iterrows():
             order = Orders(
+                name=row["name"],
                 status=StatusEnum[row["status"].upper()],  # Convert status to enum
                 created_at=datetime.strptime(row["created_at"], "%Y-%m-%d %H:%M:%S"),
             )

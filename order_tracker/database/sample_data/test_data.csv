@@ -1,11 +1,11 @@
-status,created_at
-sale,2024-06-01 10:00:00
-payment,2024-06-02 11:00:00
-production,2024-06-03 12:00:00
-delivery,2024-06-04 13:00:00
-complete,2024-06-05 14:00:00
-blocked,2024-06-06 15:00:00
-sale,2024-06-07 16:00:00
-payment,2024-06-08 17:00:00
-production,2024-06-09 18:00:00
-delivery,2024-06-10 19:00:00
+name,status,created_at
+Test1,sale,2024-06-01 10:00:00
+Test2,payment,2024-06-02 11:00:00
+Test3,production,2024-06-03 12:00:00
+Test4,delivery,2024-06-04 13:00:00
+Test5,complete,2024-06-05 14:00:00
+Test6,blocked,2024-06-06 15:00:00
+Test7,sale,2024-06-07 16:00:00
+Test8,payment,2024-06-08 17:00:00
+Test9,production,2024-06-09 18:00:00
+Test10,delivery,2024-06-10 19:00:00

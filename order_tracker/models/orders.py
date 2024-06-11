@@ -27,5 +27,6 @@ class StatusEnum(enum.Enum):
 class Orders(Base):
     __tablename__ = "orders"
     id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
     status = Column(Enum(StatusEnum), default=StatusEnum.SALE, nullable=False)
     created_at = Column(DateTime, default=func.now(), nullable=False)
