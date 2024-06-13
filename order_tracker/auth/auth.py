@@ -1,10 +1,12 @@
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import datetime, timedelta, timezone
+from typing import Annotated, Optional
 
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt
-from models.users import Users
+from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
+
+from order_tracker.models.users import Users
 
 SECRET_KEY = "KlgH6AzYDeZeGwD288to79I3vTHT8wp7"
 ALGORITHM = "HS256"
@@ -39,8 +41,34 @@ def create_access_token(
 
     encode = {"sub": username, "id": user_id}
     if expires_delta:
-        expire = datetime.now(datetime.UTC) + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(datetime.UTC) + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     encode.update({"exp": expire})
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+async def get_current_user(request: Request):
+    try:
+        token = request.cookies.get("access_token")
+        if token is None:
+            return None
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+        username: str = payload.get("sub")
+        user_id: int = payload.get("id")
+
+        if username is None or user_id is None:
+            raise HTTPException(
+                status_code=401, detail="Invalid token"
+            )
+        return {"username": username, "id": user_id}
+
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+
+    except JWTError:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+
+user_dependency = Annotated[dict, Depends(get_current_user)]

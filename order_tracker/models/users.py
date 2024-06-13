@@ -10,6 +10,7 @@ class RoleEnum(enum.Enum):
     SALES = "sales"
     WAREHOUSE = "warehouse"
     CLIENT = "client"
+    BASIC = "basic"
 
 
 class Users(Base):

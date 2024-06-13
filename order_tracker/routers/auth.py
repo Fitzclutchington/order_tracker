@@ -1,17 +1,18 @@
 from datetime import timedelta
 from typing import Optional
 
-from fastapi import (APIRouter, Depends, Form, HTTPException, Request,
-                     Response, status)
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
-from jose import JWTError, jwt
 
-from order_tracker.auth.auth import (ALGORITHM, SECRET_KEY, authenticate_user,
-                                     create_access_token, get_password_hash)
+from order_tracker.auth.auth import (
+    authenticate_user,
+    create_access_token,
+    get_password_hash,
+)
 from order_tracker.database.database import db_dependency
-from order_tracker.models.users import Users
+from order_tracker.models.users import RoleEnum, Users
 
 router = APIRouter(
     prefix="/auth", tags=["auth"], responses={401: {"user": "Not authorized"}}
@@ -30,22 +31,7 @@ class LoginForm:
         self.password = form.get("password")
 
 
-templates = Jinja2Templates(directory="templates/")
-
-
-async def get_current_user(request: Request):
-    try:
-        token = request.cookies.get("access_token")
-        if token is None:
-            return None
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        user_id: int = payload.get("id")
-        if username is None or user_id is None:
-            logout(request)
-        return {"username": username, "id": user_id}
-    except JWTError:
-        raise HTTPException(status_code=404, detail="Not Found")
+templates = Jinja2Templates(directory="order_tracker/templates/")
 
 
 @router.post("/token")
@@ -73,7 +59,7 @@ async def login(request: Request, db: db_dependency):
     try:
         form = LoginForm(request)
         await form.create_oauth_form()
-        response = RedirectResponse(url="/todos", status_code=status.HTTP_302_FOUND)
+        response = RedirectResponse(url="/orders", status_code=status.HTTP_302_FOUND)
         validate_user_cookie = await login_for_access_token(
             response=response, form_data=form, db=db
         )
@@ -133,6 +119,7 @@ async def register_user(
     hash_password = get_password_hash(password)
     user_model.hashed_password = hash_password
     user_model.is_active = True
+    user_model.role = RoleEnum.BASIC
 
     db.add(user_model)
     db.commit()
