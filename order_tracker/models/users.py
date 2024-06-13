@@ -1,5 +1,7 @@
 import enum
-from sqlalchemy import Boolean, Column, Integer, String, Enum
+
+from sqlalchemy import Boolean, Column, Enum, Integer, String
+
 from order_tracker.database.database import Base
 
 
