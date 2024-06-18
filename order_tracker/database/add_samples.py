@@ -5,6 +5,26 @@ import pandas as pd
 
 from order_tracker.database.database import SessionLocal
 from order_tracker.models.orders import Orders, StatusEnum
+from order_tracker.models.users import Users, RoleEnum
+from order_tracker.auth.auth import get_password_hash
+
+
+# TODO: bcrtypt about issue
+# Also test function works
+def create_test_users(test_users: list[dict]):
+    with SessionLocal() as db:
+        for test_user in test_users:
+            user_model = Users()
+            user_model.username = test_user["username"]
+            user_model.email = test_user["email"]
+            user_model.first_name = test_user["firstname"]
+            user_model.last_name = test_user["lastname"]
+            user_model.hashed_password = get_password_hash(test_user["password"])
+            user_model.is_active = True
+            user_model.role = RoleEnum.BASIC
+
+            db.add(user_model)
+    db.commit()
 
 
 def add_samples(samples: pd.DataFrame) -> None:
@@ -21,7 +41,25 @@ def add_samples(samples: pd.DataFrame) -> None:
 
 if __name__ == "__main__":
     script_dir = Path(__file__).parent
-    data_path = script_dir / 'sample_data' / 'test_data.csv'
+    data_path = script_dir / "sample_data" / "test_data.csv"
     samples = pd.read_csv(data_path)
+
+    test_users = [
+        {
+            "username": "test1",
+            "email": "test1@gmail.com",
+            "firstname": "test1",
+            "lastname": "test1",
+            "password": "password",
+        },
+        {
+            "username": "test2",
+            "email": "test2@gmail.com",
+            "firstname": "test2",
+            "lastname": "test2",
+            "password": "password",
+        },
+    ]
+    create_test_users(test_users)
     add_samples(samples)
     print("DB upload complete")
