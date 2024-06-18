@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Request, status, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -13,6 +13,8 @@ router = APIRouter(
 templates = Jinja2Templates(directory="order_tracker/templates/")
 
 
+# TODO: figure out how to render username instead
+# of user id of the sales owner
 @router.get("/", response_class=HTMLResponse)
 async def get_orders(request: Request, db: db_dependency, user: user_dependency):
     if user is None:
@@ -22,3 +24,29 @@ async def get_orders(request: Request, db: db_dependency, user: user_dependency)
     return templates.TemplateResponse(
         "orders.html", {"request": request, "orders": orders, "user": user}
     )
+
+
+@router.get("/create", response_class=HTMLResponse)
+async def create_order_page(request: Request, user: user_dependency):
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
+    return templates.TemplateResponse(
+        "add-order.html", {"request": request, "user": user}
+    )
+
+
+@router.post("/create", response_class=HTMLResponse)
+async def create_order(
+    request: Request, db: db_dependency, user: user_dependency, name: str = Form(...)
+):
+
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
+
+    orders_model = Orders()
+    orders_model.name = name
+    orders_model.sales_user_id = user.get("id")
+
+    db.add(orders_model)
+    db.commit()
+    return RedirectResponse(url="/orders", status_code=status.HTTP_302_FOUND)

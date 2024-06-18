@@ -1,0 +1,17 @@
+{% include "base.html" %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            Start a new order
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" class="form-control" name="name" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Order</button>
+            </form>
+        </div>
+    </div>
+</div>

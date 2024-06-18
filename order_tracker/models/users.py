@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Boolean, Column, Enum, Integer, String
+from sqlalchemy import Boolean, Column, Enum, Integer, String, DateTime, func
 
 from order_tracker.database.database import Base
 
@@ -22,4 +22,6 @@ class Users(Base):
     last_name = Column(String)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
     role = Column(Enum(RoleEnum), nullable=False)
+    

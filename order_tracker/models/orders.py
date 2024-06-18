@@ -10,7 +10,6 @@ from sqlalchemy import (
     String,
     func,
 )
-from sqlalchemy.orm import relationship
 
 from order_tracker.database.database import Base
 
@@ -30,3 +29,4 @@ class Orders(Base):
     name = Column(String)
     status = Column(Enum(StatusEnum), default=StatusEnum.SALE, nullable=False)
     created_at = Column(DateTime, default=func.now(), nullable=False)
+    sales_user_id = Column(Integer, ForeignKey("users.id"))

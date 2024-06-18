@@ -48,6 +48,11 @@ def create_access_token(
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
+# TODO: this only ensures that a token exists,
+# does not validate against the DB
+# could have a scenario where DB is deleted but token 
+# is still in the browser cache. I'm guessing a fix here is to 
+# check the DB that the user exists
 async def get_current_user(request: Request):
     try:
         token = request.cookies.get("access_token")
@@ -59,9 +64,7 @@ async def get_current_user(request: Request):
         user_id: int = payload.get("id")
 
         if username is None or user_id is None:
-            raise HTTPException(
-                status_code=401, detail="Invalid token"
-            )
+            raise HTTPException(status_code=401, detail="Invalid token")
         return {"username": username, "id": user_id}
 
     except ExpiredSignatureError:
