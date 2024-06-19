@@ -3,14 +3,12 @@ from pathlib import Path
 
 import pandas as pd
 
-from order_tracker.database.database import SessionLocal
-from order_tracker.models.orders import Orders, StatusEnum
-from order_tracker.models.users import Users, RoleEnum
 from order_tracker.auth.auth import get_password_hash
+from order_tracker.database.database import Base, SessionLocal, engine
+from order_tracker.models.orders import Orders, StatusEnum
+from order_tracker.models.users import RoleEnum, Users
 
 
-# TODO: bcrtypt about issue
-# Also test function works
 def create_test_users(test_users: list[dict]):
     with SessionLocal() as db:
         for test_user in test_users:
@@ -40,6 +38,7 @@ def add_samples(samples: pd.DataFrame) -> None:
 
 
 if __name__ == "__main__":
+    Base.metadata.create_all(bind=engine)
     script_dir = Path(__file__).parent
     data_path = script_dir / "sample_data" / "test_data.csv"
     samples = pd.read_csv(data_path)
