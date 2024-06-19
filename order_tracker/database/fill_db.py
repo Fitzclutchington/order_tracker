@@ -22,7 +22,7 @@ def create_test_users(test_users: list[dict]):
             user_model.role = RoleEnum.BASIC
 
             db.add(user_model)
-    db.commit()
+        db.commit()
 
 
 def add_samples(samples: pd.DataFrame) -> None:

@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Request, status, Form
+from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from order_tracker.auth.auth import user_dependency
 from order_tracker.database.database import db_dependency
 from order_tracker.models.orders import Orders
-from order_tracker.auth.auth import user_dependency
 
 router = APIRouter(
     prefix="/orders", tags=["orders"], responses={404: {"description": "Not found"}}
@@ -45,7 +45,7 @@ async def create_order(
 
     orders_model = Orders()
     orders_model.name = name
-    orders_model.sales_user_id = user.get("id")
+    orders_model.sales_user_id = user.id
 
     db.add(orders_model)
     db.commit()

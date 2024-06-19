@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
 
+from order_tracker.database.database import db_dependency
 from order_tracker.models.users import Users
 
 SECRET_KEY = "KlgH6AzYDeZeGwD288to79I3vTHT8wp7"
@@ -27,7 +28,6 @@ def verify_password(plain_password, hashed_password):
 
 def authenticate_user(username: str, password: str, db):
     user = db.query(Users).filter(Users.username == username).first()
-
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -48,12 +48,7 @@ def create_access_token(
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-# TODO: this only ensures that a token exists,
-# does not validate against the DB
-# could have a scenario where DB is deleted but token 
-# is still in the browser cache. I'm guessing a fix here is to 
-# check the DB that the user exists
-async def get_current_user(request: Request):
+async def get_current_user(request: Request, db: db_dependency):
     try:
         token = request.cookies.get("access_token")
         if token is None:
@@ -65,7 +60,12 @@ async def get_current_user(request: Request):
 
         if username is None or user_id is None:
             raise HTTPException(status_code=401, detail="Invalid token")
-        return {"username": username, "id": user_id}
+
+        user = db.query(Users).filter(Users.id == user_id).first()
+        if user is None:
+            raise HTTPException(status_code=401, detail="User not found")
+
+        return user
 
     except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
