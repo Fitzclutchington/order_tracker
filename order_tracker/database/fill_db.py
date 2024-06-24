@@ -32,6 +32,7 @@ def add_samples(samples: pd.DataFrame) -> None:
                 name=row["name"],
                 status=StatusEnum[row["status"].upper()],  # Convert status to enum
                 created_at=datetime.strptime(row["created_at"], "%Y-%m-%d %H:%M:%S"),
+                sales_user_id=row["sales_user_id"]
             )
             db.add(order)
         db.commit()

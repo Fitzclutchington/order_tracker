@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Form, Request, status
+from fastapi import APIRouter, Form, Request, status, Path, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -50,3 +50,20 @@ async def create_order(
     db.add(orders_model)
     db.commit()
     return RedirectResponse(url="/orders", status_code=status.HTTP_302_FOUND)
+
+
+@router.get("/{order_id}", response_class=HTMLResponse)
+def view_order(
+    request: Request,
+    db: db_dependency,
+    user: user_dependency,
+    order_id: int = Path(gt=0),
+):
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
+    order = db.query(Orders).filter(Orders.id==order_id).first()
+    if order is None:
+        raise HTTPException(status_code=404, detail="Todo not found.")
+    return templates.TemplateResponse(
+        "order.html", {"request": request, "user": user, "order": order}
+    )

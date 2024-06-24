@@ -1,11 +1,11 @@
-name,status,created_at, sales_user_id
-Test1,sale,2024-06-01 10:00:00, 1
-Test2,payment,2024-06-02 11:00:00, 1
-Test3,production,2024-06-03 12:00:00, 1
-Test4,delivery,2024-06-04 13:00:00, 1
-Test5,complete,2024-06-05 14:00:00, 1
-Test6,blocked,2024-06-06 15:00:00, 2
-Test7,sale,2024-06-07 16:00:00, 2
-Test8,payment,2024-06-08 17:00:00, 2
-Test9,production,2024-06-09 18:00:00, 2
-Test10,delivery,2024-06-10 19:00:00, 2
+name,status,created_at,sales_user_id
+Test1,sale,2024-06-01 10:00:00,1
+Test2,payment,2024-06-02 11:00:00,1
+Test3,production,2024-06-03 12:00:00,1
+Test4,delivery,2024-06-04 13:00:00,1
+Test5,complete,2024-06-05 14:00:00,1
+Test6,blocked,2024-06-06 15:00:00,2
+Test7,sale,2024-06-07 16:00:00,2
+Test8,payment,2024-06-08 17:00:00,2
+Test9,production,2024-06-09 18:00:00,2
+Test10,delivery,2024-06-10 19:00:00,2

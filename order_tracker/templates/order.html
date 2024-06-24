@@ -1,0 +1,27 @@
+{% include "base.html" %}
+<div class="container">
+    <div class="card text-center">
+        <div class="card-header">
+            Order Summary
+        </div>
+        <div class="card-body">
+            {% if order %}
+            <h5 class="card-title">{{ order.name }}</h5>
+            {% else %}
+            <h5 class="card-title">Order</h5>
+            {% endif %}
+
+            {% if order %}
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">ID: {{ order.id }}</li>
+                <li class="list-group-item">Name: {{ order.name }}</li>
+                <li class="list-group-item">Sales Person ID: {{ order.sales_user_id }}</li>
+                <li class="list-group-item">Status: {{ order.status.value }}</li>
+                <li class="list-group-item">Created: {{ order.created_at }}</li>
+              </ul>
+            {% endif %}
+
+            <a class="btn btn-primary" href="create">Create a new order</a>
+        </div>
+    </div>
+</div>
