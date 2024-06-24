@@ -21,7 +21,6 @@ markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 mdurl==0.1.2
 numpy==1.26.4
--e git+ssh://git@github.com/Fitzclutchington/order_tracker.git@5c9ef2186e2b2487c7cb8a8f6a985560f27efc5d#egg=order_tracker
 orjson==3.10.3
 packaging==24.1
 pandas==2.2.2
