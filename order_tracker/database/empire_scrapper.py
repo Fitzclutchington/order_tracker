@@ -3,53 +3,65 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import time
 
+
 # Base URL of the webstore with pagination placeholder
-base_url = 'https://example.com/store?page={}'
+base_url = "https://empiresafe.com/pre-owned/all/?fwp_paged="
 
 # List to store scraped data
 data = []
 
+valid_keys = [
+    "MANUFACTURER",
+    "SERIES",
+    "FIRE PROTECTION",
+    "MODEL",
+    "INSIDE DIMENSIONS",
+    "OUTSIDE DIMENSIONS",
+    "CAPACITY",
+    "WEIGHT",
+    "SWING",
+]
+
 # Iterate through pages
-for page in range(1, 11):  # Adjust the range as needed
-    url = base_url.format(page)
+# TODO: don't hard code this
+for page_num in range(1, 10):
+    url = f"{base_url}{page_num}"
+    print(url)
     response = requests.get(url)
-    
-    if response.status_code != 200:
-        print(f"Failed to retrieve page {page}")
+    print(response)
+    if response.status_code != 202:
+        print(f"Failed to retrieve page {page_num}")
         continue
 
-    soup = BeautifulSoup(response.content, 'html.parser')
+    soup = BeautifulSoup(response.content, "html.parser")
 
     # Find all items on the current page
-    items = soup.find_all('div', class_='item-class')  # Adjust the tag and class
+    item_div = soup.find("div", class_="entry-content")
+    item_list = item_div.find("ul")
+    items = item_list.find_all("li", class_="fwp-product")
 
     for item in items:
-        try:
-            # Extract desired attributes (adjust selectors as needed)
-            name = item.find('h2', class_='item-name').text.strip()
-            price = item.find('span', class_='item-price').text.strip()
-            weight = item.find('span', class_='item-weight').text.strip()
-            
-            # Store the data in a dictionary
-            item_data = {
-                'name': name,
-                'price': price,
-                'weight': weight
-            }
-            
-            # Append to the list
-            data.append(item_data)
-        except AttributeError as e:
-            print(f"Error parsing item: {e}")
-            continue
-    
+        item_data = {}
+        image = item.find("img").get("src")
+        item_data["image"] = image
+
+        item_content = item.find("table", class_="dimTbl")
+        rows = item_content.find_all("tr")
+
+        for row in rows:
+            header = row.find("th").text.strip()
+            if header in valid_keys:
+                item_data[header] = row.find("td").text.strip()
+
+        price_content = item_content.find("p", class_="fwp-price")
+        if price_content.find("span", class_="woocommerce-Price-amount amount"):
+            pass
+        else:
+            item_data["price"] = price_content.find("span", class_="amount").text.strip()
+        # Append to the list
+        data.append(item_data)
+
     # Respectful scraping by adding a delay
-    time.sleep(2)
+    time.sleep(5)
 
-# Convert to DataFrame (optional)
-df = pd.DataFrame(data)
-
-# Save to CSV
-df.to_csv('webstore_items.csv', index=False)
-
-print("Scraping complete. Data saved to 'webstore_items.csv'.")
+print(data)
