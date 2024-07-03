@@ -2,7 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import time
-
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 
 # Base URL of the webstore with pagination placeholder
 base_url = "https://empiresafe.com/pre-owned/all/?fwp_paged="
@@ -22,42 +24,42 @@ valid_keys = [
     "SWING",
 ]
 
+# Set up Chrome options
+chrome_options = Options()
+chrome_options.add_argument('--headless')  # Run in headless mode
+chrome_options.add_argument('--disable-gpu')  # Disable GPU usage (optional)
+chrome_options.add_argument('--window-size=1920x1080')  # Set the window size (optional)
+driver = webdriver.Chrome(options=chrome_options)
+
+
 # Iterate through pages
 # TODO: don't hard code this
 for page_num in range(1, 10):
     url = f"{base_url}{page_num}"
-    print(url)
-    response = requests.get(url)
-    print(response)
-    if response.status_code != 202:
-        print(f"Failed to retrieve page {page_num}")
-        continue
-
-    soup = BeautifulSoup(response.content, "html.parser")
-
-    # Find all items on the current page
-    item_div = soup.find("div", class_="entry-content")
-    item_list = item_div.find("ul")
-    items = item_list.find_all("li", class_="fwp-product")
+   
+    driver.get(url)
+    html = driver.page_source
+    
+    items = driver.find_elements(By.CSS_SELECTOR, "div.entry-content ul li.fwp-product")
 
     for item in items:
         item_data = {}
-        image = item.find("img").get("src")
+        image = item.find_element(By.TAG_NAME, "img").get_attribute("src")
         item_data["image"] = image
 
-        item_content = item.find("table", class_="dimTbl")
-        rows = item_content.find_all("tr")
+        table = item.find_element(By.CSS_SELECTOR, "table.dimTbl")
+        rows = table.find_elements(By.TAG_NAME, "tr")
 
         for row in rows:
-            header = row.find("th").text.strip()
+            header = row.find_element(By.TAG_NAME, "th").text.strip()
             if header in valid_keys:
-                item_data[header] = row.find("td").text.strip()
+                item_data[header] = row.find_element(By.TAG_NAME, "td").text.strip()
 
-        price_content = item_content.find("p", class_="fwp-price")
-        if price_content.find("span", class_="woocommerce-Price-amount amount"):
+        price_content = item.find_element(By.CSS_SELECTOR, "p.fwp-price span.amount")
+        if price_content:
             pass
         else:
-            item_data["price"] = price_content.find("span", class_="amount").text.strip()
+            item_data["price"] = price_content.text.strip()
         # Append to the list
         data.append(item_data)
 
