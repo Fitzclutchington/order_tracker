@@ -1,7 +1,7 @@
+import re
 import typing as t
 from datetime import datetime
 from pathlib import Path
-import re
 
 import pandas as pd
 from sqlalchemy.orm import sessionmaker
@@ -58,10 +58,14 @@ def load_manufacturers(session: sessionmaker) -> dict[str, int]:
 
 
 def parse_dimensions(dims: str | None) -> dict[str, int]:
-    if dims is None:
-        return None
-    dims_no_units = dims.replace("OD", "").replace('H', '').replace('W', '').replace('D', '')
+    if pd.isna(dims):
+        return {}
+    dims_no_units = (
+        dims.replace("OD", "").replace("H", "").replace("W", "").replace("D", "")
+    )
     split_dims = re.split(r"[x/]", dims_no_units)
+    if len(split_dims) < 3:
+        return {}
     dims_dict = {
         "height": int(split_dims[0]),
         "width": int(split_dims[1]),
@@ -69,12 +73,41 @@ def parse_dimensions(dims: str | None) -> dict[str, int]:
     }
     if len(split_dims) == 4:
         dims_dict["overall_depth"] = int(split_dims[3])
-    
+
     return dims_dict
 
 
-def parse_price(price: str) -> dict[str, t.Any]:
-    pass
+def parse_price(price: str) -> dict[str, t.Any] | str:
+    if pd.isna(price) or price == "Price Upon Request":
+        return {}
+
+    match = re.match(r"(\D+)?(\d[\d,]*)", price)
+    if match:
+        currency = match.group(1)  # Currency symbol
+        price_num = match.group(2)  # Numerical part of the price
+
+        # Remove commas from the numerical part
+        price_num = price_num.replace(",", "")
+
+        # Remove invalid trailing zeros
+        if price_num.endswith("00"):
+            price_num = price_num[:-2]
+
+        # Convert to float
+        price = float(price_num)
+        return {"currency": currency, "price": price_num}
+    return {}
+
+
+def parse_unit_value(unit_value: str | None) -> dict[str, t.Any]:
+    if pd.isna(unit_value):
+        return {}
+    match = re.match(r"(\d+)\s*(\w+)", unit_value)
+    if match:
+        value = float(match.group(1))  # Numerical part of the weight
+        unit = match.group(2)  # Unit of the weight
+        return {"unit": unit, "value": value}
+    return {}
 
 
 def add_items(df: pd.DataFrame) -> None:
@@ -91,13 +124,16 @@ def add_items(df: pd.DataFrame) -> None:
             inside_dims = parse_dimensions(row["INSIDE DIMENSIONS"])
             outside_dims = parse_dimensions(row["OUTSIDE DIMENSIONS"])
             parsed_price = parse_price(row["price"])
+            parsed_weight = parse_unit_value(row["WEIGHT"])
+            parsed_capacity = parse_unit_value(row["CAPACITY"])
+
             # TODO: function to parse dimensions
             # TODO: function to parse price
             item = Items(
                 manufacturer_id=manufacturer_id,
                 model_name=row["MODEL"],
                 series=row["SERIES"],
-                url=row["URL"],
+                url=row["image"],
                 security_level=row["SECURITY LEVEL"],
                 height_inside=inside_dims.get("height"),
                 height_outside=outside_dims.get("height"),
@@ -106,15 +142,17 @@ def add_items(df: pd.DataFrame) -> None:
                 depth_inside=inside_dims.get("depth"),
                 depth_outside=outside_dims.get("depth"),
                 overall_depth=outside_dims.get("overal_depth"),
-                capacity=float(row["CAPACITY"].split()[0]) if row["CAPACITY"] else None,
+                capacity=parsed_capacity.get("value"),
+                capacity_unit=parsed_capacity.get("unit"),
                 fire_protection=row["FIRE PROTECTION"],
-                weight=int(row["WEIGHT"]) if row["WEIGHT"] else None,
-                price=parsed_price["price"],
-                currency=parsed_price["currency"],
+                weight=parsed_weight.get("value"),
+                weight_unit=parsed_weight.get("unit"),
+                price=parsed_price.get("price"),
+                currency=parsed_price.get("currency"),
                 swing=row["SWING"],
             )
             db.add(item)
-        db.commit
+        db.commit()
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ class Manufacturer(Base):
 
 
 class Items(Base):
-    __tablename__ = "orders"
+    __tablename__ = "items"
     id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), nullable=False)
@@ -37,8 +37,10 @@ class Items(Base):
     depth_outside = Column(Integer)
     overall_depth = Column(Integer)
     capacity = Column(Float)
+    capacity_unit = Column(String)
     fire_protection = Column(String)
     weight = Column(Integer)
+    weight_unit = Column(String)
     price = Column(Float)
     currency = Column(String)
     swing = Column(String)
