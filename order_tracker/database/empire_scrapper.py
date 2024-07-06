@@ -24,6 +24,7 @@ valid_keys = [
     "CAPACITY",
     "WEIGHT",
     "SWING",
+    "SECURITY LEVEL"
 ]
 
 size_keys = [
