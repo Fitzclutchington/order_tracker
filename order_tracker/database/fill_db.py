@@ -7,7 +7,7 @@ from order_tracker.auth.auth import get_password_hash
 from order_tracker.database.database import Base, SessionLocal, engine
 from order_tracker.models.orders import Orders, StatusEnum
 from order_tracker.models.users import RoleEnum, Users
-
+from order_tracker.models.items import Items, Manufacturer
 
 def create_test_users(test_users: list[dict]):
     with SessionLocal() as db:
@@ -25,7 +25,7 @@ def create_test_users(test_users: list[dict]):
         db.commit()
 
 
-def add_samples(samples: pd.DataFrame) -> None:
+def add_orders(samples: pd.DataFrame) -> None:
     with SessionLocal() as db:
         for _, row in samples.iterrows():
             order = Orders(
@@ -38,11 +38,21 @@ def add_samples(samples: pd.DataFrame) -> None:
         db.commit()
 
 
+def add_manufacturers(df: pd.DataFrame) -> None:
+    manufacturers = pd.unique(df["MANUFACTURER"])
+    # TODO: can this be batched?
+    with SessionLocal() as db:
+        for manufacturer in manufacturers:
+            manufacturer_obj = Manufacturer(name=manufacturer)
+            db.add(manufacturer_obj)
+        db.commit()
+
 if __name__ == "__main__":
     Base.metadata.create_all(bind=engine)
     script_dir = Path(__file__).parent
-    data_path = script_dir / "sample_data" / "test_data.csv"
-    samples = pd.read_csv(data_path)
+    data_path = script_dir / "sample_data" 
+    order_samples = pd.read_csv(data_path / "test_data.csv")
+    items_samples = pd.read_csv(data_path / "items.csv")
 
     test_users = [
         {
@@ -61,5 +71,7 @@ if __name__ == "__main__":
         },
     ]
     create_test_users(test_users)
-    add_samples(samples)
+    add_orders(order_samples)
+    add_manufacturers(items_samples)
+    #add_items(items_samples)
     print("DB upload complete")
